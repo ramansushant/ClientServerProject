@@ -1,4 +1,3 @@
-#client.py
 import socket
 import pickle
 import json
@@ -24,11 +23,23 @@ class Client:
         self.data[key] = [value]
         print(self.data)
 
-        serialized_data_byte = pickle.dumps(self.data)
-        print(serialized_data_byte)
+        serialize_format = input("Enter the Format: ")
 
-        serialized_data_json = json.dumps(self.data)
-        print(serialized_data_json)
+        if serialize_format == 'BINARY':
+            serialized_data_byte = pickle.dumps(self.data)
+            print(serialized_data_byte)
+
+        if serialize_format == 'JSON':
+            serialized_data_json = json.dumps(self.data)
+            print(serialized_data_json)
+
+        if serialize_format == 'XML':
+            serialized_data_json = json.dumps(self.data)
+            print(serialized_data_json)
+
+    def text_file(self):
+        file_name = input("Enter Filename to be sent: ")
+        encrypted = input("Enter E to send Encrypted Version else P: ")
 
     def send_data_to_server(self):
         self.s.send(self.data)
@@ -37,7 +48,11 @@ class Client:
 if __name__ == "__main__":
     client = Client()
     client.connect_to_server()
-    client.dict()
+    user_input = input("Enter D to create Dictionary or Enter T to send the Text File: ")
+    if user_input == 'D':
+        client.dict()
+    if user_input == 'T':
+        client.text_file()
     client.disconnect_server()
 
 
