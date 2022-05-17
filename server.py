@@ -10,7 +10,6 @@ class Server:
 
         # Create a socket object
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.data = dict()
 
     def start_server(self):
 
@@ -20,11 +19,11 @@ class Server:
         self.s.listen()
         c, addr = self.s.accept()
         print(f"{addr} is connected.")
-        threading.Thread(target=self.receive_data, args=(c, addr,)).start()
+        threading.Thread(target=self.receive_data, args=(c, addr)).start()
 
     def receive_data(self, c, addr):
-        self.data = c.recv(1024)
-        print(self.data)
+        data = c.recv(1024).decode()
+        print('File received: ' + data)
         c.close()
 
 

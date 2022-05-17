@@ -1,12 +1,15 @@
 import socket
 import pickle
 import json
+from dict2xml import dict2xml
+import threading
 
 class Client:
 
     def __init__(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data = dict()
+        self.filename = ""
 
     def connect_to_server(self):
 
@@ -23,26 +26,34 @@ class Client:
         self.data[key] = [value]
         print(self.data)
 
+
         serialize_format = input("Enter the Format: ")
 
         if serialize_format == 'BINARY':
-            serialized_data_byte = pickle.dumps(self.data)
-            print(serialized_data_byte)
+            with open('output.bin', 'wb') as f:
+                pickle.dump(self.data, f)
+                self.filename = 'output.bin'
+                print("Serialization in BINARY format done")
 
-        if serialize_format == 'JSON':
-            serialized_data_json = json.dumps(self.data)
-            print(serialized_data_json)
+        elif serialize_format == 'JSON':
+            with open('output.json', 'w') as f:
+                json.dump(self.data, f)
+                self.filename = 'output.json'
+                print("Serialization in JSON format done")
 
-        if serialize_format == 'XML':
-            serialized_data_json = json.dumps(self.data)
-            print(serialized_data_json)
+        elif serialize_format == 'XML':
+            with open('output.xml', 'w') as f:
+                f.write(dict2xml(self.data))
+                self.filename = 'output.xml'
+                print("Serialization in XML format done")
+
 
     def text_file(self):
-        file_name = input("Enter Filename to be sent: ")
+        self.filename = input("Enter Filename to be sent: ")
         encrypted = input("Enter E to send Encrypted Version else P: ")
 
     def send_data_to_server(self):
-        self.s.send(self.data)
+        self.s.send(self.filename.encode())
 
 
 if __name__ == "__main__":
@@ -51,8 +62,12 @@ if __name__ == "__main__":
     user_input = input("Enter D to create Dictionary or Enter T to send the Text File: ")
     if user_input == 'D':
         client.dict()
+        client.send_data_to_server()
+
     if user_input == 'T':
         client.text_file()
+        client.send_data_to_server()
+
     client.disconnect_server()
 
 
