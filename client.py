@@ -14,6 +14,7 @@ class Client:
         self.key_filename = 'key.key'
         self.encrypted_filename = ""
         self.encrypted = ""
+        self.encrypted_text = ""
 
     def connect_to_server(self):
 
@@ -68,21 +69,35 @@ class Client:
             with open(self.filename, 'rb') as file:
                 text_in_file = file.read()
 
-            encrypted_text = f.encrypt(text_in_file)
+            self.encrypted_text = f.encrypt(text_in_file)
 
             self.encrypted_filename = 'encrypted_' + self.filename
 
             with open(self.encrypted_filename, 'wb') as encrypted_file:
-                encrypted_file.write(encrypted_text)
+                encrypted_file.write(self.encrypted_text)
 
             print("Encrypted file saved as: ", self.encrypted_filename)
 
     def send_data_to_server(self):
         if self.encrypted_filename == "":
+            # start sending the file
+            with open(self.filename, "rb") as file:
+                data = file.read(1024)
+                while data:
+                    self.s.send(data)
+                    data = file.read(1024)
+                print("Data Sent Successfully")
+            self.s.send("Non-Encrypted".encode())
             self.s.send(self.filename.encode())
         else:
+            # start sending the file
+            with open(self.encrypted_filename, "rb") as file:
+                    data = file.read(1024)
+                    while data:
+                        self.s.send(data)
+                        data = file.read(1024)
+            self.s.send("Encrypted".encode())
             self.s.send(self.encrypted_filename.encode())
-
 
 if __name__ == "__main__":
     client = Client()
