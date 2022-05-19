@@ -5,6 +5,8 @@ from dict2xml import dict2xml
 from cryptography.fernet import Fernet
 import os
 
+METADATA_SEPARATOR = "$$"
+
 class Client:
 
     def __init__(self):
@@ -58,11 +60,11 @@ class Client:
         self.encrypted = input("Enter E to send Encrypted Version else P: ")
         if self.encrypted == "E":
             if os.path.exists(self.key_filename):
-                with open("key.key", "rb") as key_file:
+                with open(self.key_filename, "rb") as key_file:
                     key = key_file.read()
             else:
                 key = Fernet.generate_key()
-                with open("key.key", "wb") as key_file:
+                with open(self.key_filename, "wb") as key_file:
                     key_file.write(key)
 
             f = Fernet(key)
@@ -70,7 +72,6 @@ class Client:
                 text_in_file = file.read()
 
             self.encrypted_text = f.encrypt(text_in_file)
-
             self.encrypted_filename = 'encrypted_' + self.filename
 
             with open(self.encrypted_filename, 'wb') as encrypted_file:
@@ -79,25 +80,28 @@ class Client:
             print("Encrypted file saved as: ", self.encrypted_filename)
 
     def send_data_to_server(self):
-        if self.encrypted_filename == "":
-            # start sending the file
-            with open(self.filename, "rb") as file:
-                data = file.read(1024)
-                while data:
-                    self.s.send(data)
-                    data = file.read(1024)
-                print("Data Sent Successfully")
-            self.s.send("Non-Encrypted".encode())
-            self.s.send(self.filename.encode())
-        else:
-            # start sending the file
+        if self.encrypted == "E":
+            e = "Encrypted"
+            self.s.send(f"{e}{METADATA_SEPARATOR}{self.encrypted_filename}".encode())
             with open(self.encrypted_filename, "rb") as file:
-                    data = file.read(1024)
+                    data = file.read(4096)
                     while data:
                         self.s.send(data)
-                        data = file.read(1024)
-            self.s.send("Encrypted".encode())
-            self.s.send(self.encrypted_filename.encode())
+                        data = file.read(4096)
+            print("Encrypted Data Sent Successfully")
+
+
+        else:
+            self.s.send(f"Non-Encrypted{METADATA_SEPARATOR}{self.filename}".encode())
+            with open(self.filename, "rb") as file:
+                data = file.read(4096)
+                while data:
+                    self.s.send(data)
+                    data = file.read(4096)
+            print("Non-Encrypted Data Sent Successfully")
+
+
+
 
 if __name__ == "__main__":
     client = Client()

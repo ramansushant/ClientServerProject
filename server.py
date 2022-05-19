@@ -3,7 +3,9 @@ import socket
 import threading
 import time
 import os
+from cryptography.fernet import Fernet
 
+METADATA_SEPARATOR = "$$"
 
 class Server:
 
@@ -12,7 +14,9 @@ class Server:
         # Create a socket object
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.configuration = ''
-        self.filename = "s_test"
+        self.server_filename = ""
+        self.key_filename = 'key.key'
+        self.decrypted_text = ""
 
     def start_server(self):
 
@@ -28,25 +32,39 @@ class Server:
         threading.Thread(target=self.receive_data, args=(c, addr)).start()
 
     def receive_data(self, c, addr):
-        data = c.recv(1024)
-        encryption = c.recv(1024).decode()
-        print(encryption)
-        filename = c.recv(1024).decode()
-        print(filename)
+        metadata = c.recv(4096).decode()
+        encryption, filename = metadata.split(METADATA_SEPARATOR)
+        data = c.recv(4096)
 
         if self.configuration == 'S':
+
             if encryption == 'Non-Encrypted':
-                print('MESSAGE: ' + data)
+                print('MESSAGE: ' + data.decode())
+
             else:
-                print("To be Decided")
+                if os.path.exists(self.key_filename):
+                    with open(self.key_filename, "rb") as key_file:
+                        key = key_file.read()
+                f = Fernet(key)
+                self.decrypted_text = f.decrypt(data)
+                print(self.decrypted_text)
 
         elif self.configuration == 'F':
             if encryption == 'Non-Encrypted':
-                self.filename = 's_' + filename
-                with open(self.filename, "wb") as received_file:
+                self.server_filename = 's_' + filename
+                with open(self.server_filename, "wb") as received_file:
                     received_file.write(data)
             else:
-                print("To be Decided")
+                if os.path.exists(self.key_filename):
+                    with open(self.key_filename, "rb") as key_file:
+                        key = key_file.read()
+                f = Fernet(key)
+                self.decrypted_text = f.decrypt(data)
+                self.server_filename = 's_' + filename
+                print(self.server_filename)
+                with open(self.server_filename, "wb") as received_file:
+                    received_file.write(self.decrypted_text)
+                    print("File Saved as:" + self.server_filename)
 
         c.close()
 
