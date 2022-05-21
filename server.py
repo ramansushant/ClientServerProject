@@ -19,11 +19,13 @@ class Server:
         self.decrypted_text = ""
 
     def start_server(self):
-
+        # Create a socket object
+        # IP and port of the machine where server is running
         host = '0.0.0.0'
         port = 8000
         print("CONFIGURE: PRINT CONTENT")
 
+        # User Input to Configure Server
         self.configuration = input("Enter S for SCREEN or Enter F for FILE: ")
         if self.configuration == "S" or self.configuration == "F":
             print(f"Server Configured in Mode: {self.configuration}")
@@ -31,10 +33,13 @@ class Server:
             print("Invalid Input Try Again")
             self.configuration = input("Enter S for SCREEN or Enter F for FILE: ")
 
+        # Bind and Listen to the Port
         self.s.bind((host, port))
         self.s.listen()
         c, addr = self.s.accept()
         print(f"{addr} is connected.")
+
+        # To Run parallel threads to allow other incoming connection
         threading.Thread(target=self.receive_data, args=(c, addr)).start()
 
     def receive_data(self, c, addr):
@@ -52,7 +57,11 @@ class Server:
                         if os.path.exists(self.key_filename):
                             with open(self.key_filename, "rb") as key_file:
                                 key = key_file.read()
+
+                        # Key file used for decryption
                         f = Fernet(key)
+
+                        # Decrypt incoming text using the above key
                         self.decrypted_text = f.decrypt(data)
                         print(self.decrypted_text)
 
@@ -68,8 +77,12 @@ class Server:
                     if os.path.exists(self.key_filename):
                         with open(self.key_filename, "rb") as key_file:
                             key = key_file.read()
+
+                    # Key file used for decryption
                     f = Fernet(key)
                     self.decrypted_text = f.decrypt(data)
+
+                    # Save File on Server by appending s_ to the filename
                     self.server_filename = 's_' + filename
                     print(self.server_filename)
                     with open(self.server_filename, "wb") as received_file:
