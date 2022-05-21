@@ -1,11 +1,11 @@
 # client.py
 import socket
 import threading
-import time
 import os
 from cryptography.fernet import Fernet
 
 METADATA_SEPARATOR = "$$"
+
 
 class Server:
 
@@ -85,4 +85,3 @@ class Server:
 if __name__ == "__main__":
     server = Server()
     server.start_server()
-

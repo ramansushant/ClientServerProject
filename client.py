@@ -8,6 +8,7 @@ import os
 # Metadata seperator is used so that Filename and Content Type can be split on Server
 METADATA_SEPARATOR = "$$"
 
+
 class Client:
     # This class connects the Client to Server and send the files both in Encrypted and Decrypted Form
 
@@ -23,15 +24,18 @@ class Client:
         self.encrypted_text = ""
 
     def connect_to_server(self):
-        host = '0.0.0.0'  # Standard loopback interface address (localhost)
-        port = 8000  # Port to listen on (non-privileged ports are > 1023)
+        # Standard loopback interface address (localhost)
+        host = '0.0.0.0'
+        # Port to listen
+        port = 8000
         try:
-            self.s.connect((host, port)) # To connect client to server on specified Host and Port
-        except:
+            # To connect client to server on specified Host and Port
+            self.s.connect((host, port))
+        except ConnectionRefusedError:
             print("Connection failed")
 
     def disconnect_server(self):
-        self.s.close() # To disconnect client from server
+        self.s.close()  # To disconnect client from server
 
     def dict(self):
         # User Input in the Dictionary Data Type
@@ -65,18 +69,19 @@ class Client:
         else:
             print("Incorrect Format. Try Again")
 
-
     def text_file(self):
         try:
             # User Input on the File that client wants to send to the server
             self.filename = input("Enter Filename to be sent: ")
             self.encrypted = input("Enter E to send Encrypted Version else P: ")
+
             # User Input on the File that client wants to send to the server
             if self.encrypted == "E":
                 if os.path.exists(self.key_filename):
                     with open(self.key_filename, "rb") as key_file:
                         key = key_file.read()
                 else:
+                    # Generate Key for Encryption
                     key = Fernet.generate_key()
                     with open(self.key_filename, "wb") as key_file:
                         key_file.write(key)
@@ -85,9 +90,11 @@ class Client:
                 with open(self.filename, 'rb') as file:
                     text_in_file = file.read()
 
+                # Encrypt Content of the Text File
                 self.encrypted_text = f.encrypt(text_in_file)
                 self.encrypted_filename = 'encrypted_' + self.filename
 
+                # Write Encrypted content into a new file
                 with open(self.encrypted_filename, 'wb') as encrypted_file:
                     encrypted_file.write(self.encrypted_text)
 
@@ -95,7 +102,6 @@ class Client:
 
         except Exception as ex:
             print("Error Reading the File " + str(ex))
-
 
     def send_data_to_server(self):
         try:
@@ -122,11 +128,14 @@ class Client:
         except Exception as ex:
             print("Error Sending the File " + str(ex))
 
+
 if __name__ == "__main__":
 
     client = Client()
+    # To Connect Client with Server
     client.connect_to_server()
 
+    # User Input to create a dictionary or send the text file
     user_input = input("Enter D to create Dictionary or Enter T to send the Text File: ")
 
     if user_input == 'D':
@@ -140,6 +149,5 @@ if __name__ == "__main__":
     else:
         print("Incorrect Input")
 
+    # Disconnect Server
     client.disconnect_server()
-
-
