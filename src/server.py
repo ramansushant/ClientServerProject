@@ -15,7 +15,7 @@ class Server:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.configuration = ''
         self.server_filename = ""
-        self.key_filename = 'key.key'
+        self.key_filename = '../key.key'
         self.decrypted_text = ""
 
     def start_server(self):

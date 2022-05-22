@@ -18,7 +18,7 @@ class Client:
         # Global Variables that are accessed across functions
         self.data = dict()
         self.filename = ""
-        self.key_filename = 'key.key'
+        self.key_filename = '../key.key'
         self.encrypted_filename = ""
         self.encrypted = ""
         self.encrypted_text = ""
@@ -55,9 +55,9 @@ class Client:
                 print("Serialization in BINARY format done")
 
         elif serialize_format == 'JSON':
-            with open('output.json', 'w') as f:
+            with open('../output.json', 'w') as f:
                 json.dump(self.data, f)
-                self.filename = 'output.json'
+                self.filename = '../output.json'
                 print("Serialization in JSON format done")
 
         elif serialize_format == 'XML':
