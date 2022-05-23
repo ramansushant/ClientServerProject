@@ -18,6 +18,7 @@ class Client:
         # Global Variables that are accessed across functions
         self.data = dict()
         self.filename = ""
+        self.text_in_file = ""
         self.key_filename = '../key.key'
         self.encrypted_filename = ""
         self.encrypted = ""
@@ -72,7 +73,13 @@ class Client:
     def text_file(self):
         try:
             # User Input on the File that client wants to send to the server
-            self.filename = input("Enter Filename to be sent: ")
+            self.text_in_file = input("Input Text for the Text File: ")
+            self.filename = input("Enter Filename for Text File with extension .txt: ")
+
+            # Write Text into a new file
+            with open(self.filename, 'w') as file:
+                file.write(self.text_in_file)
+
             self.encrypted = input("Enter E to send Encrypted Version else P: ")
 
             # User Input on the File that client wants to send to the server
@@ -136,7 +143,7 @@ if __name__ == "__main__":
     client.connect_to_server()
 
     # User Input to create a dictionary or send the text file
-    user_input = input("Enter D to create Dictionary or Enter T to send the Text File: ")
+    user_input = input("Enter D to create Dictionary or Enter T to create the Text File: ")
 
     if user_input == 'D':
         client.dict()
